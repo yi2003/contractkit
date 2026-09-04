@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合同小刀 · 合同 PDF 三件套（合并 / 水印 / 抽页）—— 全程本地处理</title>
+<meta name="description" content="合同小刀：纯浏览器里的合同 PDF 小工具。合并分章为整本、一键盖「仅供投标/仅供查阅」水印、按页抽印章页。文件不出本机、不上传服务器。">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f46e5'/%3E%3Cpath d='M9 6h8l6 6v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z' fill='%23fff'/%3E%3Cpath d='M17 6l6 6h-6z' fill='%23c7d2fe'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="34" height="34"><rect width="32" height="32" rx="7" fill="#4f46e5"/><path d="M9 6h8l6 6v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" fill="#fff"/><path d="M17 6l6 6h-6z" fill="#c7d2fe"/></svg>
+      </span>
+      <div>
+        <h1 data-i18n="brand.name">合同小刀</h1>
+        <p class="tagline" data-i18n="brand.sub">合同 / 标书 PDF 三件套 —— 合并 · 水印 · 抽页</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="langswitch" role="group" id="langswitch">
+        <button type="button" class="on" data-lang="zh" id="lang-zh" aria-pressed="true">中文</button>
+        <button type="button" data-lang="en" id="lang-en" aria-pressed="false">EN</button>
+      </div>
+      <div class="privacy-pill" data-i18n-aria="privacy.pill">
+        <span class="lock" aria-hidden="true">🔒</span>
+        <span data-i18n="privacy.pill">文件不出本机 · 不上传服务器</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="hero" data-i18n="hero.text">扫描件、分章 PDF 想在本地拼成整本投标文件？想盖「仅供投标」防冒用？只想抽出第 3–7 页的印章页？这三件事，在浏览器里就能办。文件从读取、处理到下载都在你电脑的内存里完成，本页没有任何网络请求。</p>
+
+  <!-- ============ 工具切换 ============ -->
+  <nav class="tooltabs" role="tablist" data-i18n-aria="nav.aria">
+    <button class="tooltab on" role="tab" aria-selected="true" data-tab="merge">
+      <span class="tt-num">1</span>
+      <span class="tt-body"><b data-i18n="tab.merge.t">合并</b><small data-i18n="tab.merge.s">分章拼整本 · 投标/归档</small></span>
+    </button>
+    <button class="tooltab" role="tab" aria-selected="false" data-tab="watermark">
+      <span class="tt-num">2</span>
+      <span class="tt-body"><b data-i18n="tab.watermark.t">加水印</b><small data-i18n="tab.watermark.s">仅供投标 / 仅供××查阅</small></span>
+    </button>
+    <button class="tooltab" role="tab" aria-selected="false" data-tab="extract">
+      <span class="tt-num">3</span>
+      <span class="tt-body"><b data-i18n="tab.extract.t">抽页</b><small data-i18n="tab.extract.s">印章页 / 附录单独导出</small></span>
+    </button>
+  </nav>
+
+  <!-- ================= 合并 ================= -->
+  <section class="panel on" id="panel-merge" role="tabpanel" aria-label="Merge">
+    <div class="panel-head">
+      <h2 data-i18n="p.merge.head">合并 —— 把扫描件 / 分章 PDF 合成一整本</h2>
+      <p data-i18n="p.merge.desc">按下面列表的顺序拼接成一份整本，可调整顺序、可删除。适合把几个章节、几份扫描件合成投标 / 归档文件。</p>
+    </div>
+
+    <div class="dropzone" id="mz-drop" role="button" tabindex="0" data-i18n-aria="p.merge.dz.aria">
+      <input type="file" id="mz-input" class="dz-input" accept="application/pdf,.pdf" multiple hidden>
+      <svg class="dz-icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+      <div class="dz-main" data-i18n="p.merge.dz.main">把 PDF <b>拖到这里</b>，或 <u>点击选择文件</u>（可多选）</div>
+      <div class="dz-sub" data-i18n="p.merge.dz.sub">支持扫描件 PDF / 电子 PDF，需按需排好顺序</div>
+    </div>
+
+    <div class="filelist" id="mz-list" hidden></div>
+
+    <div class="cfg">
+      <div class="field">
+        <label for="mz-name" data-i18n="p.merge.name">导出文件名</label>
+        <div class="row">
+          <input type="text" id="mz-name" spellcheck="false" autocomplete="off">
+          <span class="suffix">.pdf</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="mz-run" disabled><span class="btn-label" data-i18n="p.merge.run">合并并下载</span></button>
+      <p class="status" id="mz-status" role="status"></p>
+    </div>
+  </section>
+
+  <!-- ================= 水印 ================= -->
+  <section class="panel" id="panel-watermark" role="tabpanel" aria-label="Watermark" hidden>
+    <div class="panel-head">
+      <h2 data-i18n="p.wm.head">加水印 —— 一键盖「仅供投标 / 仅供××查阅」</h2>
+      <p data-i18n="p.wm.desc">水印直接画进每一页的内容之上，导出后是普通软件去不掉的斜向文字印，防止文件被拿去当正式件乱传。</p>
+    </div>
+
+    <div class="dropzone" id="wm-drop" role="button" tabindex="0" data-i18n-aria="p.wm.dz.aria">
+      <input type="file" id="wm-input" class="dz-input" accept="application/pdf,.pdf" multiple hidden>
+      <svg class="dz-icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" d="M14 2v6h6"/></svg>
+      <div class="dz-main" data-i18n="p.wm.dz.main">放入 <b>一份</b> PDF —— 拖入或 <u>点击选择</u></div>
+      <div class="dz-sub" data-i18n="p.wm.dz.sub">将在这份 PDF 的每一页（或指定页）上盖水印，原文件不动</div>
+    </div>
+
+    <div class="filecard" id="wm-info" hidden></div>
+
+    <div class="cfg">
+      <div class="field">
+        <label for="wm-text" data-i18n="p.wm.f.text">水印文字</label>
+        <input type="text" id="wm-text" value="仅供投标" maxlength="40" spellcheck="false" autocomplete="off">
+        <div class="chips" id="wm-chips" aria-label="Quick text"></div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label data-i18n="p.wm.f.angle">方向</label>
+          <div class="seg" id="wm-angle" role="radiogroup">
+            <button type="button" class="on" data-v="-45" data-i18n="p.wm.angle.n45">斜 ↗ 45°</button>
+            <button type="button" data-v="0" data-i18n="p.wm.angle.flat">水平</button>
+            <button type="button" data-v="45" data-i18n="p.wm.angle.p45">斜 ↘ 45°</button>
+          </div>
+        </div>
+        <div class="field">
+          <label data-i18n="p.wm.f.color">颜色</label>
+          <div class="seg" id="wm-color" role="radiogroup">
+            <button type="button" class="on" data-v="gray" data-i18n="p.wm.color.gray">深灰</button>
+            <button type="button" data-v="red" data-i18n="p.wm.color.red">警示红</button>
+            <button type="button" data-v="black" data-i18n="p.wm.color.black">纯黑</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="wm-opacity"><span data-i18n="p.wm.f.opacity">透明度</span> <output id="wm-opacity-out" class="val">12%</output></label>
+          <input type="range" id="wm-opacity" min="5" max="40" step="1" value="12">
+        </div>
+        <div class="field">
+          <label for="wm-font"><span data-i18n="p.wm.f.font">字号</span> <output id="wm-font-out" class="val">60</output></label>
+          <input type="range" id="wm-font" min="24" max="140" step="1" value="60">
+        </div>
+        <div class="field">
+          <label for="wm-density"><span data-i18n="p.wm.f.density">疏密</span> <output id="wm-density-out" class="val">中</output></label>
+          <input type="range" id="wm-density" min="0.7" max="2.0" step="0.05" value="1.15">
+        </div>
+      </div>
+
+      <div class="field">
+        <label data-i18n="p.wm.f.range">盖到哪些页</label>
+        <div class="seg" id="wm-range" role="radiogroup">
+          <button type="button" class="on" data-v="all" data-i18n="p.wm.range.all">全部页面</button>
+          <button type="button" data-v="pages" data-i18n="p.wm.range.pages">指定页</button>
+        </div>
+        <input type="text" id="wm-pages" class="pages-input" data-i18n-ph="p.wm.pages.ph" disabled spellcheck="false" autocomplete="off">
+        <p class="hint" id="wm-pages-hint"></p>
+      </div>
+
+      <div class="field">
+        <label for="wm-name" data-i18n="p.out.name">导出文件名</label>
+        <div class="row">
+          <input type="text" id="wm-name" spellcheck="false" autocomplete="off">
+          <span class="suffix">.pdf</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="wm-run" disabled><span class="btn-label" data-i18n="p.wm.run">加水印并下载</span></button>
+      <p class="status" id="wm-status" role="status"></p>
+    </div>
+  </section>
+
+  <!-- ================= 抽页 ================= -->
+  <section class="panel" id="panel-extract" role="tabpanel" aria-label="Extract" hidden>
+    <div class="panel-head">
+      <h2 data-i18n="p.ex.head">抽页 —— 只要印章页 / 附录，导出小份</h2>
+      <p data-i18n="p.ex.desc">按页码抽出需要的页（如第 3–7 页的盖章页、附录），导出一小份。原文件保留不动。</p>
+      <p class="hint" data-i18n="p.ex.tip">小技巧：先在系统阅读器里翻一下原 PDF，记下目标页码再回来填。</p>
+    </div>
+
+    <div class="dropzone" id="ex-drop" role="button" tabindex="0" data-i18n-aria="p.ex.dz.aria">
+      <input type="file" id="ex-input" class="dz-input" accept="application/pdf,.pdf" multiple hidden>
+      <svg class="dz-icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" d="M14 2v6h6M12 11v6m-3-3h6"/></svg>
+      <div class="dz-main" data-i18n="p.ex.dz.main">放入 <b>一份</b> PDF —— 拖入或 <u>点击选择</u></div>
+      <div class="dz-sub" data-i18n="p.ex.dz.sub">一次处理一份；多选时只取第一份</div>
+    </div>
+
+    <div class="filecard" id="ex-info" hidden></div>
+
+    <div class="cfg">
+      <div class="field">
+        <label for="ex-pages"><span data-i18n="p.ex.f.pages">要抽出的页码</span><span class="muted" data-i18n="p.ex.f.pages.soft">（逗号 / 短横均可，从 1 开始）</span></label>
+        <input type="text" id="ex-pages" data-i18n-ph="p.ex.pages.ph" spellcheck="false" autocomplete="off">
+        <p class="hint" id="ex-preview"></p>
+      </div>
+      <div class="field">
+        <label for="ex-name" data-i18n="p.out.name">导出文件名</label>
+        <div class="row">
+          <input type="text" id="ex-name" spellcheck="false" autocomplete="off">
+          <span class="suffix">.pdf</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="ex-run" disabled><span class="btn-label" data-i18n="p.ex.run">抽出并下载</span></button>
+      <p class="status" id="ex-status" role="status"></p>
+    </div>
+  </section>
+
+  <!-- ============ 隐私 / FAQ ============ -->
+  <section class="notes" aria-label="FAQ">
+    <h2 data-i18n="faq.title">关于「本地处理」，你可能想问</h2>
+    <dl>
+      <dt data-i18n="faq.q1">我的合同会被传到网上吗？</dt>
+      <dd data-i18n="faq.a1">不会。这个页面<b>没有任何服务器、也没有任何网络请求</b>——程序（含 PDF 处理引擎）在你打开网页的瞬间就已全部进入浏览器。你的 PDF 从读取、处理到下载，都只在你电脑的内存里进行，关掉页面即彻底消失。</dd>
+      <dt data-i18n="faq.q2">支持什么样的 PDF？</dt>
+      <dd data-i18n="faq.a2">普通可读的 PDF 都可以，包括扫描件（扫描件本质就是一张张图片组成的 PDF）。加密、带打开密码的 PDF 无法处理。</dd>
+      <dt data-i18n="faq.q3">文件大小 / 页数有限制吗？</dt>
+      <dd data-i18n="faq.a3">上限取决于你电脑的内存，一般单个几十 MB、几百页以内的合同都很流畅。超大文件处理时请稍等状态提示。</dd>
+      <dt data-i18n="faq.q4">水印能去掉吗？加错了会损坏原文件吗？</dt>
+      <dd data-i18n="faq.a4">水印是直接画进每一页页面内容里的，普通 PDF 软件删不掉。原文件始终是只读的，处理失败也不会动它——导出的都是新文件。</dd>
+      <dt data-i18n="faq.q5">需要联网 / 注册 / 装软件吗？</dt>
+      <dd data-i18n="faq.a5">首次打开需要网络加载页面（之后可整站下载到本地断网使用），无需注册、无需安装、无广告。整站就是几个静态文件，可随时审查。</dd>
+    </dl>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p data-i18n="foot.text">合同小刀 · 纯前端静态站，pdf-lib 驱动，无构建、可离线 · 只做合同 PDF 的三件小事，文件永不离开你的电脑。</p>
+  </div>
+</footer>
+
+<noscript><p class="ns" data-i18n="ns.text">需要启用 JavaScript 才能在浏览器里处理 PDF。</p></noscript>
+
+<div class="toastwrap" id="toastwrap" aria-live="polite"></div>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="helpers.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# 部署到 Vercel 时不带上本地杂物
+node_modules
+node_modules/.npm-cache
+test
+scripts
+samples
+.vercelignore
+.gitignore
+package-lock.json

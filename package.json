@@ -1,0 +1,15 @@
+{
+  "name": "contractkit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "合同小刀 —— 纯浏览器端合同 PDF 三件套：合并 / 水印 / 抽页。文件不上传，全部本地处理。",
+  "scripts": {
+    "test": "node --test",
+    "samples": "node scripts/make-samples.cjs",
+    "serve": "python3 -m http.server 8080",
+    "deploy": "npx --yes vercel@latest --prod"
+  },
+  "devDependencies": {
+    "pdf-lib": "1.17.1"
+  }
+}
