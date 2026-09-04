@@ -476,15 +476,16 @@
           c.classList.toggle('on', c === b);
         });
         wmNameSuggest();
+        wmSyncText();
       });
       wrap.appendChild(b);
     });
   }
 
   function wmCanRun() {
-    var it = wm.state.item;
     var run = $('wm-run');
-    if (!it) { run.disabled = true; return; }
+    var it = wm.state.item;
+    if (!it || !$('wm-text').value.trim()) { run.disabled = true; return; }
     if (segValue('wm-range') === 'pages') {
       var r = H.parsePageInput($('wm-pages').value, it.pageCount, I18N.pageMessages());
       run.disabled = !r.ok;
@@ -493,16 +494,75 @@
     }
   }
 
+  /* 空文字时的就地提示（按钮此时已禁用，这里说明原因） */
+  function wmTextHint() {
+    var hint = $('wm-text-hint');
+    if (!hint) return;
+    if (!wm.state.item || $('wm-text').value.trim()) {
+      hint.hidden = true;
+      hint.textContent = '';
+      return;
+    }
+    hint.hidden = false;
+    hint.textContent = I('st.wm.textEmpty');
+  }
+
+  /* 实时预览：用与水印生成同一条 renderTile 管线，画在一页“示意纸”上 */
+  var PREVIEW_W = 520, PREVIEW_H = 230, PREVIEW_DPI = 2;
+
+  function drawWmPreview() {
+    var cv = $('wm-preview-canvas');
+    if (!cv) return;
+    var ctx = cv.getContext('2d');
+    var text = $('wm-text').value;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(PREVIEW_DPI, PREVIEW_DPI);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H);
+    /* 示意正文行 */
+    ctx.fillStyle = '#e6e9f4';
+    var widths = [430, 380, 300, 450, 420, 330, 300];
+    for (var li = 0; li < widths.length; li++) {
+      ctx.fillRect(30, 26 + li * 26, widths[li], 7);
+    }
+    if (!text.trim()) return; /* 空文字：按钮已禁用，画布留白由提示说明 */
+
+    var angleDeg = parseInt(segValue('wm-angle'), 10);
+    var opacityPct = parseInt($('wm-opacity').value, 10);
+    var fontPt = parseInt($('wm-font').value, 10);
+    var density = parseFloat($('wm-density').value);
+    var colorHex = WAT_COLORS[segValue('wm-color')] || WAT_COLORS.gray;
+    var prevPx = Math.max(16, Math.round(fontPt * 0.68)); /* 把 字号滑块 映射成示意纸上的像素字号 */
+    var tile = renderTile(text, angleDeg, opacityPct, colorHex, prevPx);
+    var step = tile.widthPx * density;
+    var cols = Math.ceil(PREVIEW_W / step) + 2;
+    var rows = Math.ceil(PREVIEW_H / step) + 2;
+    var x0 = (PREVIEW_W - (cols - 1) * step) / 2;
+    var y0 = (PREVIEW_H - (rows - 1) * step) / 2;
+    for (var cx = 0; cx < cols; cx++) {
+      for (var cy = 0; cy < rows; cy++) {
+        ctx.drawImage(tile.canvas, x0 + cx * step, y0 + cy * step, tile.widthPx, tile.heightPx);
+      }
+    }
+  }
+
+  function wmSyncText() {
+    wmCanRun();
+    wmTextHint();
+    drawWmPreview();
+  }
+
   wm.afterLoad = function (it) {
     setStatus('wm-status', I('st.wm.ready', { name: it.name, pages: it.pageCount }), 'ok');
     wmNameSuggest();
     wmPagesHint();
-    wmCanRun();
+    wmSyncText();
   };
   wm.afterClear = function () {
     setStatus('wm-status', I('st.empty'));
     $('wm-pages-hint').textContent = '';
-    wmCanRun();
+    wmSyncText();
   };
 
   function wmNameSuggest() {
@@ -519,13 +579,11 @@
   $('wm-text').addEventListener('input', function () {
     /* 手输内容：若与某个默认值相同则点亮对应 chip，否则全部熄灭 */
     var cur = $('wm-text').value;
-    var any = false;
     Array.prototype.forEach.call($('wm-chips').querySelectorAll('.chip'), function (c) {
-      var on = c.dataset.t === cur;
-      c.classList.toggle('on', on);
-      if (on) any = true;
+      c.classList.toggle('on', c.dataset.t === cur);
     });
     wmNameSuggest();
+    wmSyncText();
   });
 
   /* 控件绑定：滑块输出 + 分段单选 */
@@ -543,6 +601,9 @@
     if (n > 1.55) return I('p.wm.sparse');
     return I('p.wm.mid');
   });
+  ['wm-opacity', 'wm-font', 'wm-density'].forEach(function (id) {
+    $(id).addEventListener('input', drawWmPreview);
+  });
   function bindSeg(segId, onChange) {
     $(segId).addEventListener('click', function (e) {
       var b = e.target.closest('button');
@@ -553,8 +614,8 @@
       onChange && onChange(b.dataset.v);
     });
   }
-  bindSeg('wm-angle');
-  bindSeg('wm-color');
+  bindSeg('wm-angle', drawWmPreview);
+  bindSeg('wm-color', drawWmPreview);
   bindSeg('wm-range', function (v) {
     $('wm-pages').disabled = v !== 'pages';
     if (v === 'pages') $('wm-pages').focus();
@@ -797,6 +858,7 @@
       setStatus('wm-status', I('st.empty'));
       $('wm-run').disabled = true;
     }
+    wmSyncText(); /* 提示 + 预览（含默认水印文字随语言更新） */
     if (ex.state.item) {
       ex.renderCard();
       exNameSuggest();

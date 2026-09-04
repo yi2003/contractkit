@@ -7,16 +7,16 @@ require('../i18n.js');
 const I18N = globalThis.ContractKit.i18n;
 const H = globalThis.ContractKit.helpers;
 
-test('i18n：默认中文，可切换英文并记忆', () => {
-  assert.equal(I18N.getLang(), 'zh');
-  assert.equal(I18N.t('brand.name'), '合同小刀');
-  assert.equal(I18N.t('tab.extract.t'), '抽页');
-  I18N.setLang('en', { apply: false });
+test('i18n：默认英文，可切换中文并记忆', () => {
   assert.equal(I18N.getLang(), 'en');
   assert.equal(I18N.t('brand.name'), 'ContractKit');
-  assert.equal(I18N.t('p.wm.run'), 'Watermark & download');
+  assert.equal(I18N.t('tab.extract.t'), 'Extract');
   I18N.setLang('zh', { apply: false });
+  assert.equal(I18N.getLang(), 'zh');
   assert.equal(I18N.t('brand.name'), '合同小刀');
+  assert.equal(I18N.t('p.wm.run'), '加水印并下载');
+  I18N.setLang('en', { apply: false });
+  assert.equal(I18N.t('brand.name'), 'ContractKit');
 });
 
 test('i18n：占位符插值', () => {
@@ -27,6 +27,7 @@ test('i18n：占位符插值', () => {
 });
 
 test('i18n：页码解析报错随语言走（helpers 注入 messages）', () => {
+  I18N.setLang('zh', { apply: false });
   const zhPg = I18N.pageMessages();
   const r1 = H.parsePageInput('11', 10, zhPg);
   assert.equal(r1.ok, false);

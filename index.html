@@ -153,6 +153,15 @@
       </div>
 
       <div class="field">
+        <label data-i18n="p.wm.preview">水印效果预览</label>
+        <div class="wm-preview">
+          <canvas id="wm-preview-canvas" width="1040" height="460" aria-hidden="true"></canvas>
+        </div>
+        <p class="hint" id="wm-preview-note" data-i18n="p.wm.preview.note">示意：实时展示文字 / 颜色 / 透明度 / 字号 / 疏密 / 方向（非你的文档页面）</p>
+        <p class="hint err" id="wm-text-hint" hidden></p>
+      </div>
+
+      <div class="field">
         <label for="wm-name" data-i18n="p.out.name">导出文件名</label>
         <div class="row">
           <input type="text" id="wm-name" spellcheck="false" autocomplete="off">

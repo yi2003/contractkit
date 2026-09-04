@@ -6,7 +6,7 @@ A tiny, **browser-only** PDF knife for contracts. It does just three jobs — an
 2. **Watermark** — stamp “仅供投标 / FOR BID ONLY” or any custom text diagonally, so the file can't be passed off as the official copy.
 3. **Extract** — pull out just the seal / appendix pages (e.g. pages 3–7) into a small file.
 
-The UI is bilingual (**中文 / English**, switch in the top-right corner; the choice is remembered in `localStorage` — locally, never sent anywhere).
+The UI is bilingual (**English by default**, switch to 中文 in the top-right corner; the choice is remembered in `localStorage` — locally, never sent anywhere).
 
 > **Why it exists.** Contract & ID scans are too sensitive to upload to sites like ilovepdf. This page has **no server and makes zero network requests** — the whole program (PDF engine included) loads into your browser the moment you open it, and every PDF is read, processed and downloaded entirely in your computer's memory.
 > Deliberately out of scope: no OCR, no e-signature, no cloud storage. Powered by [pdf-lib](https://github.com/Hopding/pdf-lib) — a plain static site, no build step.

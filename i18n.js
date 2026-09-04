@@ -67,6 +67,8 @@
     'p.wm.range.all': '全部页面',
     'p.wm.range.pages': '指定页',
     'p.wm.pages.ph': '如：1-3、5、8-12（第 1 页开始）',
+    'p.wm.preview': '水印效果预览',
+    'p.wm.preview.note': '示意：实时展示文字 / 颜色 / 透明度 / 字号 / 疏密 / 方向（非你的文档页面）',
     'p.wm.run': '加水印并下载',
 
     /* 面板：抽页 */
@@ -220,6 +222,8 @@
     'p.wm.range.all': 'All pages',
     'p.wm.range.pages': 'Pages…',
     'p.wm.pages.ph': 'e.g. 1-3, 5, 8-12 (start at 1)',
+    'p.wm.preview': 'Watermark preview',
+    'p.wm.preview.note': 'Live sample: text / color / opacity / size / spacing / angle (not your document)',
     'p.wm.run': 'Watermark & download',
 
     'p.ex.head': 'Extract — keep only the seal / appendix pages',
@@ -327,7 +331,7 @@
       var stored = localStorage.getItem(STORE_KEY);
       if (stored === 'zh' || stored === 'en') return stored;
     } catch (e) { /* ignore */ }
-    return 'zh'; /* 国内产品默认中文 */
+    return 'en'; /* 首次访问默认英文；右上角切换过的用户会记住选择 */
   }
 
   function t(key, vars) {
